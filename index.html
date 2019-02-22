@@ -9,13 +9,11 @@
 </head>
 <body>
   <section class="lightning">
-    <div v-for="fundingTarget, i in currentFundingTargets"
+    <div v-for="fundingTarget in currentFundingTargets"
          v-bind:fundingTarget="fundingTarget"
          v-bind:key="fundingTarget.id"
-         v-if="fundingTarget.fundingTarget > currentFunding"
-         v-on:click="addNewFunding"
          class="currentFunding">
-      <div class="progress" v-bind:style="{ 'width': fundingPercentage(fundingTarget.fundingTarget) }"></div>
+      <div class="progress" v-bind:style="{ 'width': getPercentage() }"></div>
       <div class="label">
         <span>{{ fundingTarget.fundingTitle }}</span>
       </div>

@@ -20,6 +20,7 @@
 .lightning div.currentFunding div.label {
   position: absolute;
   margin-top: 6px;
+  z-index: 2;
 }
 
 .lightning div.currentFunding div.label span {
@@ -34,5 +35,25 @@
   height: 30px;
   width: 33%;
   background-color: #555;
-  transition: width 1s ease-in-out;
+  background-image: linear-gradient(to right, #888, #555);
+  transition: width 2s ease-in-out;
+  z-index: 1;
 }
+
+.lightning div.currentFunding div.progress::before {
+  position: absolute;
+  content: "";
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  background-image: linear-gradient(to right,#555,hsl(104, 100%, 41%));
+  z-index: -1;
+  transition: opacity 0.5s linear;
+  opacity: 0;
+}
+
+.lightning div.currentFunding div.progress.active::before {
+  opacity: 1;
+}
+
