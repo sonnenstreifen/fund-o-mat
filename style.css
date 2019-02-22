@@ -1,0 +1,38 @@
+*,
+*:before,
+*:after {
+  box-sizing: border-box;
+}
+
+.lightning {
+  display: block;
+  width: 100%;
+}
+
+.lightning div.currentFunding {
+  position: relative;
+  width: 100%;
+  height: 30px;
+  background-color: #ddd;
+  margin-bottom: 10px;
+}
+
+.lightning div.currentFunding div.label {
+  position: absolute;
+  margin-top: 6px;
+}
+
+.lightning div.currentFunding div.label span {
+  color: #fff;
+  background-color: rgba(0,0,0,0.3);
+  padding: 3px 5px;
+  white-space: nowrap;
+}
+
+.lightning div.currentFunding div.progress {
+  position: absolute;
+  height: 30px;
+  width: 33%;
+  background-color: #555;
+  transition: width 1s ease-in-out;
+}

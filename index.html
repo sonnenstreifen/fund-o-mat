@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="X-UA-Compatible" content="ie=edge">
+  <title>Lightning Income</title>
+  <link rel="stylesheet" type="text/css" href="style.css">
+</head>
+<body>
+  <section class="lightning">
+    <div v-for="fundingTarget, i in currentFundingTargets"
+         v-bind:fundingTarget="fundingTarget"
+         v-bind:key="fundingTarget.id"
+         v-if="fundingTarget.fundingTarget > currentFunding"
+         v-on:click="addNewFunding"
+         class="currentFunding">
+      <div class="progress" v-bind:style="{ 'width': fundingPercentage(fundingTarget.fundingTarget) }"></div>
+      <div class="label">
+        <span>{{ fundingTarget.fundingTitle }}</span>
+      </div>
+    </div>
+    <button v-on:click="increment">add 100</button>
+  </section>
+  <script src="./vue.js"></script>
+  <script src="./main.js"></script>
+</body>
+</html>
