@@ -3,31 +3,12 @@ var app = new Vue({
   data: {
     currentFunding: 0,
     pastFundingTargets: [],
-    currentFundingTargets: [
-      { fundingTitle: 'Lad uns auf einen Kaffee ein',
-        fundingTarget: 750,
-        percentage: 0,
-        id: 1 }
-    ],
-    futureFundingTargets: [
-      { fundingTitle: 'Lad uns auf eine Pizza ein',
-        fundingTarget: 2000,
-        percentage: 0,
-        id: 2 },
-      { fundingTitle: 'Hilf uns mit den Serverkosten',
-        fundingTarget: 5000,
-        percentage: 0,
-        id: 3 },
-      { fundingTitle: 'Schenke uns ein Lächeln',
-        fundingTarget: 15000,
-        percentage: 0,
-        id: 4 }
-    ],
+    currentFundingTargets: [],
+    futureFundingTargets: [],
   },
   methods: {
     fundingPercentage: function (fundingTarget) {
       this.percentage = (this.currentFunding / fundingTarget) * 100;
-      console.log(this.percentage);
       if (this.percentage > 100) {
         this.percentage = 100;
       }
@@ -41,7 +22,6 @@ var app = new Vue({
       app.currentFunding += 100;
     },
     getPercentage: function () {
-      console.log(this.currentFundingTargets[0].percentage);
       return this.currentFundingTargets[0].percentage + '%';
     },
     setActive: function () {
@@ -51,7 +31,7 @@ var app = new Vue({
       document.querySelector('.progress').classList.remove('active');
     }
   },
-  watch : {
+  watch: {
     currentFunding: function() {
       app.setActive();
       app.currentFundingTargets[0].percentage =
@@ -73,7 +53,29 @@ var app = new Vue({
       }
       setTimeout(function() {
         app.resetActive();
-      }, 2000);
+      }, 1800);
     }
+  },
+  created: function () {
+    console.log("init");
+    var lang = document.documentElement.lang;
+    loadJSON(function(response) {
+      var fundingTargets = JSON.parse(response);
+      console.log(fundingTargets);
+      app.currentFundingTargets.push(fundingTargets.shift());
+      app.futureFundingTargets = fundingTargets;
+    }, lang);
   }
 })
+
+function loadJSON(callback, lang) {   
+  var xobj = new XMLHttpRequest();
+      xobj.overrideMimeType("application/json");
+  xobj.open('GET', './inc/'+lang+'_fundingTargets.json', true);
+  xobj.onreadystatechange = function () {
+    if (xobj.readyState == 4 && xobj.status == "200") {
+      callback(xobj.responseText);
+    }
+  };
+  xobj.send(null);
+}

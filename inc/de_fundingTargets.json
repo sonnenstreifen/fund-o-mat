@@ -1,0 +1,21 @@
+[{
+	"fundingTitle": "Lad uns auf einen Kaffee ein",
+	"fundingTarget": 750,
+	"percentage": 0,
+	"id": 1
+}, {
+	"fundingTitle": "Lad uns auf eine Pizza ein",
+	"fundingTarget": 2000,
+	"percentage": 0,
+	"id": 2
+}, {
+	"fundingTitle": "Hilf uns mit den Serverkosten",
+	"fundingTarget": 5000,
+	"percentage": 0,
+	"id": 3
+}, {
+	"fundingTitle": "Schenke uns ein Lächeln",
+	"fundingTarget": 15000,
+	"percentage": 0,
+	"id": 4
+}]

@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="de">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,6 +9,15 @@
 </head>
 <body>
   <section class="lightning">
+    <div class="pastFunding">
+      <div v-for="pastTarget in pastFundingTargets"
+           v-bind:pastTarget="pastTarget"
+           v-bind:key="pastTarget.id"
+           class="entry">
+        <div class="check">&#10004;</div>
+        <span>{{ pastTarget.fundingTitle }}</span>
+      </div>
+    </div>
     <div v-for="fundingTarget in currentFundingTargets"
          v-bind:fundingTarget="fundingTarget"
          v-bind:key="fundingTarget.id"

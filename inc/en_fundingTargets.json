@@ -1,0 +1,21 @@
+[{
+	"fundingTitle": "treat us to a coffee",
+	"fundingTarget": 750,
+	"percentage": 0,
+	"id": 1
+}, {
+	"fundingTitle": "treat us to a pizza",
+	"fundingTarget": 2000,
+	"percentage": 0,
+	"id": 2
+}, {
+	"fundingTitle": "help us with the servercosts",
+	"fundingTarget": 5000,
+	"percentage": 0,
+	"id": 3
+}, {
+	"fundingTitle": "make us smile",
+	"fundingTarget": 15000,
+	"percentage": 0,
+	"id": 4
+}]
