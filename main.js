@@ -66,9 +66,9 @@ var app = new Vue({
       app.futureFundingTargets = fundingTargets;
     }, lang);
   }
-})
+});
 
-function loadJSON(callback, lang) {   
+function loadJSON(callback, lang) {
   var xobj = new XMLHttpRequest();
       xobj.overrideMimeType("application/json");
   xobj.open('GET', './inc/'+lang+'_fundingTargets.json', true);

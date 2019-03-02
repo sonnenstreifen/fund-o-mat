@@ -1,21 +1,31 @@
 [{
 	"fundingTitle": "Lad uns auf einen Kaffee ein",
+	"fundingTitleComplete": "Ihr habt uns auf einen Kaffee eingeladen!",
 	"fundingTarget": 750,
 	"percentage": 0,
 	"id": 1
 }, {
 	"fundingTitle": "Lad uns auf eine Pizza ein",
+	"fundingTitleComplete": "Ihr habt uns auf eine Pizza eingeladen!",
 	"fundingTarget": 2000,
 	"percentage": 0,
 	"id": 2
 }, {
-	"fundingTitle": "Hilf uns mit den Serverkosten",
+	"fundingTitle": "Unterstützt uns mit den Serverkosten",
+	"fundingTitleComplete": "Ihr habt uns mit den Serverkosten unterstützt!",
 	"fundingTarget": 5000,
 	"percentage": 0,
 	"id": 3
 }, {
 	"fundingTitle": "Schenke uns ein Lächeln",
+	"fundingTitleComplete": "Ihr habt uns ein Lächeln geschenkt!",
 	"fundingTarget": 15000,
 	"percentage": 0,
 	"id": 4
+}, {
+	"fundingTitle": "",
+	"fundingTitleComplete": "Ihr seid unglaublich!",
+	"fundingTarget": 100000,
+	"percentage": 0,
+	"id": 5
 }]
