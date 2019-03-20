@@ -1,31 +1,37 @@
 [{
 	"fundingTitle": "Lad uns auf einen Kaffee ein",
 	"fundingTitleComplete": "Ihr habt uns auf einen Kaffee eingeladen!",
-	"fundingTarget": 750,
+	"fundingTarget": 100000,
 	"percentage": 0,
 	"id": 1
 }, {
 	"fundingTitle": "Lad uns auf eine Pizza ein",
 	"fundingTitleComplete": "Ihr habt uns auf eine Pizza eingeladen!",
-	"fundingTarget": 2000,
+	"fundingTarget": 300000,
 	"percentage": 0,
 	"id": 2
 }, {
 	"fundingTitle": "Unterstützt uns mit den Serverkosten",
 	"fundingTitleComplete": "Ihr habt uns mit den Serverkosten unterstützt!",
-	"fundingTarget": 5000,
+	"fundingTarget": 1000000,
 	"percentage": 0,
 	"id": 3
 }, {
-	"fundingTitle": "Schenke uns ein Lächeln",
-	"fundingTitleComplete": "Ihr habt uns ein Lächeln geschenkt!",
-	"fundingTarget": 15000,
+	"fundingTitle": "Reicht die Lightning Torch an uns weiter",
+	"fundingTitleComplete": "Ihr habt die Lightning Torch an uns weitergereicht!",
+	"fundingTarget": 4000000,
 	"percentage": 0,
 	"id": 4
 }, {
-	"fundingTitle": "",
-	"fundingTitleComplete": "Ihr seid unglaublich!",
-	"fundingTarget": 100000,
+	"fundingTitle": "Seid ihr absolut wahnsinnig?",
+	"fundingTitleComplete": "Ihr seid absolut wahnsinnig!",
+	"fundingTarget": 12000000,
 	"percentage": 0,
 	"id": 5
+}, {
+	"fundingTitle": "Dieses Ziel wird eh nie erreicht",
+	"fundingTitleComplete": "Ihr habt das Unmögliche möglich gemacht!",
+	"fundingTarget": 50000000,
+	"percentage": 0,
+	"id": 6
 }]
