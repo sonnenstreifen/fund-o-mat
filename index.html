@@ -27,9 +27,23 @@
         <span>{{ fundingTarget.fundingTitle }}</span>
       </div>
     </div>
-    <button v-on:click="increment">add 100</button>
   </section>
-  <script src="./vue.js"></script>
-  <script src="./main.js"></script>
+  <section class="receiveLightning">
+    <div id="lightningTip">
+      <p id="lightningTipLogo">⚡</p>
+      <div id="lightningTipInputs">
+        <input type="number" class="lightningTipInput" id="lightningTipAmount" placeholder="Betrag in satoshi">
+        <textarea class="lightningTipInput" id="lightningTipMessage" placeholder="Schicke uns eine kurze Nachricht mit"></textarea>
+        <button class="lightningTipButton" id="lightningTipGetInvoice" onclick="getInvoice()">Generiere QR</button>
+        <div id="lightningTipError">
+          <p></p>
+        </div>
+      </div>
+    </div>
+  </section>
+  <script src="./inc/vue.min.js"></script>
+  <script src="./inc/qrcode.min.js"></script>
+  <script src="./inc/lightningTip.min.js"></script>
+  <script src="./inc/main.js"></script>
 </body>
 </html>
