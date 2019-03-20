@@ -18,9 +18,6 @@ var app = new Vue({
       app.pastFundingTargets.push(app.currentFundingTargets.shift());
       app.currentFundingTargets.push(app.futureFundingTargets.shift());
     },
-    increment: function () {
-      app.currentFunding += 100;
-    },
     getPercentage: function () {
       return this.currentFundingTargets[0].percentage + '%';
     },
@@ -29,6 +26,26 @@ var app = new Vue({
     },
     resetActive: function () {
       document.querySelector('.progress').classList.remove('active');
+    },
+    listenForFunding: function () {
+      var request = new XMLHttpRequest();
+
+      request.onreadystatechange = function () {
+        if (request.readyState === 4 && request.status === 200) {
+          var json = JSON.parse(request.responseText);
+
+          if (json.donations && json.donations != app.currentFunding) {
+            console.log("new donations amount: " + json.donations);
+            app.currentFunding = json.donations;
+          }
+        }
+
+      };
+      var requestUrl = "./lightningTip.php";
+      request.open("POST", requestUrl, true);
+      request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+      var params = "Action=getdonations";
+      request.send(params);
     }
   },
   watch: {
@@ -56,12 +73,18 @@ var app = new Vue({
       }, 1800);
     }
   },
-  created: function () {
+  mounted: function() {
+    this.$nextTick(function() {
+      window.setInterval(function() {
+        app.listenForFunding();
+      },2000);
+    });
+  },
+  created: function() {
     console.log("init");
     var lang = document.documentElement.lang;
     loadJSON(function(response) {
       var fundingTargets = JSON.parse(response);
-      console.log(fundingTargets);
       app.currentFundingTargets.push(fundingTargets.shift());
       app.futureFundingTargets = fundingTargets;
     }, lang);
