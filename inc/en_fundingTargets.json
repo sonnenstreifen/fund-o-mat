@@ -5,31 +5,32 @@
 	"percentage": 0,
 	"id": 1
 }, {
-	"fundingTitle": "you treated us to a pizza!",
+	"fundingTitle": "treat us to a pizza!",
+	"fundingTitleComplete": "you treated us to a pizza!",
 	"fundingTarget": 300000,
 	"percentage": 0,
 	"id": 2
 }, {
 	"fundingTitle": "help us with the servercosts",
-	"fundingTitle": "you helped us with the servercosts!",
+	"fundingTitleComplete": "you helped us with the servercosts!",
 	"fundingTarget": 1000000,
 	"percentage": 0,
 	"id": 3
 }, {
 	"fundingTitle": "pass the lightning torch to us",
-	"fundingTitle": "you passed the lightning torch to us!",
+	"fundingTitleComplete": "you passed the lightning torch to us!",
 	"fundingTarget": 4000000,
 	"percentage": 0,
 	"id": 4
 }, {
 	"fundingTitle": "be absolutely incredible",
-	"fundingTitle": "you are absolutely incredible!",
+	"fundingTitleComplete": "you are absolutely incredible!",
 	"fundingTarget": 12000000,
 	"percentage": 0,
 	"id": 5
 }, {
 	"fundingTitle": "you will not reach this tier anyway",
-	"fundingTitle": "you made the impossible, possible!",
+	"fundingTitleComplete": "you made the impossible, possible!",
 	"fundingTarget": 50000000,
 	"percentage": 0,
 	"id": 6
