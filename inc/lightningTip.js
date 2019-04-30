@@ -1,5 +1,8 @@
 ///////// CHANGE ME ////////
-var requestUrl = window.location.protocol + "//" + window.location.hostname + "/lightning/lightningTip.php";
+//var requestUrl = window.location.protocol + "//" + window.location.hostname + "/lightning/lightningTip.php";
+var requestUrl = "https://sonnenstreifen.de/lightning/inc/lightningTip.php";
+var tipAmounts      = [10000,20000,40000];
+var tipAmountsLabel = ['10k sat','20k sat','40k sat'];
 ///////// END CHANGE ME ////////
 
 // To prohibit multiple requests at the same time
@@ -39,7 +42,8 @@ switch (document.documentElement.lang) {
       MUST_BE_NUMBER: "Spendenbetrag muss eine Zahl sein",
       BACKEND_FAIL: "Lightning Node nicht erreichbar",
       THANK_YOU: "Vielen Dank für deine Spende!",
-      INVOICE_EXPIRED: "Der QR Code ist abgelaufen, bitte generiere einen neuen indem du die Seite erneut aufrufst!"
+      INVOICE_EXPIRED: "Der QR Code ist abgelaufen, bitte generiere einen neuen indem du die Seite erneut aufrufst!",
+      GENERATE_QR: "Generiere QR"
     };
     break;
   case 'en':
@@ -48,18 +52,12 @@ switch (document.documentElement.lang) {
       MUST_BE_NUMBER: "Tip amount must be a number",
       BACKEND_FAIL: "Failed to reach Lightning Node",
       THANK_YOU: "Thank you for your Tip!",
-      INVOICE_EXPIRED: "Your tip request expired!"
+      INVOICE_EXPIRED: "Your tip request expired!",
+      GENERATE_QR: "Generate QR"
     };
     break;
   default:
     break;
-}
-
-var testnet = getVal('testnet');  //see if GET param testnet is set  (URL?testnet=1)
-console.log('Testnet = ' + testnet);
-if ( testnet !== null ) {
-	requestUrl = requestUrl + '?testnet=1';
-	console.log('requestUrl = ' + requestUrl );
 }
 
 // TODO: show invoice even if JavaScript is disabled
@@ -83,40 +81,17 @@ function getInvoice() {
               if (request.status === 200) {
                 console.log("Got invoice: " + json.Invoice);
                 console.log("Invoice expires in: " + json.Expiry);
-                console.log("Starting listening for invoice to get settled");
-
+                console.log("Start listening for invoice to get settled");
                 listenInvoiceSettled(json.r_hash_str);
-
                 invoice = json.Invoice;
-
-                // Update UI
-                var wrapper = document.getElementById("lightningTip");
-
-                wrapper.innerHTML = "<div id='lightningTipQR'></div>";
-                wrapper.innerHTML += "<section class='lightningTipInvoice' id='lightningTipInvoice' >" + invoice + "</section>";
-
-                wrapper.innerHTML += "<div id='lightningTipTools'>" +
-                                     "<button class='lightningTipButton' id='lightningTipCopy'>Copy</button>" +
-                                     "<button class='lightningTipButton' id='lightningTipOpen'>Open</button>" +
-                                     "<div id='lightningTipExpiry'></div>" +
-                                     "</div>";
-
-                starTimer(json.Expiry, document.getElementById("lightningTipExpiry"));
-
-                // Fixes bug which caused the content of #lightningTipTools to be visually outside of #lightningTip
-                document.getElementById("lightningTipTools").style.height = document.getElementById("lightningTipCopy").clientHeight + "px";
-
-                document.getElementById("lightningTipOpen").onclick = function () {
-                  location.href = "lightning:" + json.Invoice;
-                };
                 showQRCode();
                 running = false;
               } else {
-                showErrorMessage(json.Error);
+                showMessage(json.Error, "error");
               }
             } catch (exception) {
               console.error(exception);
-              showErrorMessage(lang.BACKEND_FAIL);
+              showMessage(lang.BACKEND_FAIL, "error");
             }
           }
         };
@@ -129,10 +104,10 @@ function getInvoice() {
         defaultGetInvoice = button.innerHTML;
         button.innerHTML = "<div class='spinner'></div>";
       } else {
-        showErrorMessage(lang.MUST_BE_NUMBER);
+        showMessage(lang.MUST_BE_NUMBER, "error");
       }
     } else {
-      showErrorMessage(lang.NO_TIP_AMOUNT);
+      showMessage(lang.NO_TIP_AMOUNT, "error");
     }
   } else {
     console.warn("Last request still pending");
@@ -144,7 +119,7 @@ function listenInvoiceSettled(r_hash_str) {
     var request = new XMLHttpRequest();
 
     //Prevent multiple calls for same invoice settled over slow networks.
-    var IsSettled = false;
+	var IsSettled = false;
     if ( IsSettled == true) {
       return;
     }
@@ -161,140 +136,349 @@ function listenInvoiceSettled(r_hash_str) {
         }
 
       }
-
     };
 
     request.open("POST", requestUrl, true);
     request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
     var params = "Action=invoicesettled&r_hash_str=" + r_hash_str;
     request.send(params);
-
   }, 2000);
 }
 
 function showThankYouScreen() {
+  var qrOverlay = document.getElementById("qrOverlay");
+  qrOverlay.remove();
+
   var wrapper = document.getElementById("lightningTip");
 
-  wrapper.innerHTML = "<p id='lightningTipLogo'>⚡</p>";
-  wrapper.innerHTML += "<p id='lightningTipFinished'>" + lang.THANK_YOU + "</p>";
+  var thanksOverlay = document.createElement("section");
+  thanksOverlay.setAttribute("id", "thanksOverlay");
+
+  var thanksText = document.createElement("p");
+  thanksText.innerHTML = lang.THANK_YOU;
+  thanksOverlay.append(thanksText);
+  thanksOverlay.classList.add("show");
+
+  wrapper.append(thanksOverlay);
+
+  setTimeout(function() {
+    thanksOverlay.classList.remove("show");
+  },5000);
 }
 
 function starTimer(duration, element) {
-  showTimer(duration, element);
+    showTimer(duration, element);
 
-  var interval = setInterval(function () {
-    if (duration > 1) {
-      duration--;
+    var interval = setInterval(function () {
+        if (duration > 1) {
+            duration--;
 
-      showTimer(duration, element);
+            showTimer(duration, element);
 
-    } else {
-      showExpired();
+        } else {
+            showExpired();
 
-      clearInterval(interval);
-    }
+            clearInterval(interval);
+        }
 
-  }, 1000);
+    }, 1000);
 
 }
 
 function showTimer(duration, element) {
-  var seconds = Math.floor(duration % 60);
-  var minutes = Math.floor((duration / 60) % 60);
-  var hours = Math.floor((duration / (60 * 60)) % 24);
+    var seconds = Math.floor(duration % 60);
+    var minutes = Math.floor((duration / 60) % 60);
+    var hours = Math.floor((duration / (60 * 60)) % 24);
 
-  seconds = addLeadingZeros(seconds);
-  minutes = addLeadingZeros(minutes);
+    seconds = addLeadingZeros(seconds);
+    minutes = addLeadingZeros(minutes);
 
-  if (hours > 0) {
-    element.innerHTML = hours + ":" + minutes + ":" + seconds;
-  } else {
-    element.innerHTML = minutes + ":" + seconds;
-  }
+    if (hours > 0) {
+        element.innerHTML = hours + ":" + minutes + ":" + seconds;
+
+    } else {
+        element.innerHTML = minutes + ":" + seconds;
+    }
+
 }
 
 function showExpired() {
-  var wrapper = document.getElementById("lightningTip");
+    var wrapper = document.getElementById("lightningTip");
 
-  wrapper.innerHTML = "<p id='lightningTipLogo'>⚡</p>";
-  wrapper.innerHTML += "<p id='lightningTipFinished'>" + lang.INVOICE_EXPIRED + "</p>";
+    wrapper.innerHTML = "<p id=\"lightningTipLogo\">⚡</p>";
+    wrapper.innerHTML += "<p id='lightningTipFinished'>" + lang.INVOICE_EXPIRED + "</p>";
 }
 
 function addLeadingZeros(value) {
-  return ("0" + value).slice(-2);
+    return ("0" + value).slice(-2);
 }
 
 function showQRCode() {
-  var element = document.getElementById("lightningTipQR");
+  var wrapper = document.getElementById("lightningTip");
 
-  createQRCode();
+  var qrOverlay = document.createElement("section");
+  qrOverlay.setAttribute("id", "qrOverlay");
 
-  element.innerHTML = qrCode;
+  var close = document.createElement("a");
+  close.setAttribute("id", "closeQR");
+  var x = document.createElement("div");
+  x.classList.add("close");
+  close.append(x);
+  qrOverlay.append(close);
+
+  var qr = document.createElement("div");
+  qr.setAttribute("id", "lightningTipQR");
+  qr.innerHTML = createQRCode();
+  qrOverlay.append(qr);
+
+  var invoiceSection = document.createElement("section");
+  invoiceSection.setAttribute("id", "lightningTipInvoice");
+  invoiceSection.innerHTML = invoice;
+  qrOverlay.append(invoiceSection);
+
+  wrapper.append(qrOverlay);
+
+  qr.addEventListener("click", function() {
+    copyToClipboard(invoice);
+    showMessage("copied to clipboard", "success");
+  });
 
   var size = document.getElementById("lightningTipInvoice").clientWidth + "px";
 
-  var qrElement = element.children[0];
+  var qrElement = qr.children[0];
 
   qrElement.style.height = size;
   qrElement.style.width = size;
+
+  var button = document.getElementById("lightningTipGetInvoice");
+  button.innerHTML = lang.GENERATE_QR;
+
+  close.addEventListener("click", function() {
+    qrOverlay.remove();
+  });
 }
 
 function createQRCode() {
-  var invoiceLength = invoice.length;
+    var invoiceLength = invoice.length;
 
-  // Just in case an invoice bigger than expected gets created
-  var typeNumber = 26;
+    // Just in case an invoice bigger than expected gets created
+    var typeNumber = 26;
 
-  for (var i = 0; i < qrCodeDataCapacities.length; i++) {
-    var dataCapacity = qrCodeDataCapacities[i];
+    for (var i = 0; i < qrCodeDataCapacities.length; i++) {
+        var dataCapacity = qrCodeDataCapacities[i];
 
-    if (invoiceLength < dataCapacity.capacity) {
-      typeNumber = dataCapacity.typeNumber;
-      break;
+        if (invoiceLength < dataCapacity.capacity) {
+            typeNumber = dataCapacity.typeNumber;
+
+            break;
+        }
+
     }
-  }
 
-  console.log("Creating QR code with type number: " + typeNumber);
+    console.log("Creating QR code with type number: " + typeNumber);
 
-  var qr = qrcode(typeNumber, "L");
+    var qr = qrcode(typeNumber, "L");
 
-  qr.addData(invoice);
-  qr.make();
+    qr.addData(invoice);
+    qr.make();
 
-  qrCode = qr.createImgTag(6, 0);
+    return qr.createImgTag(6, 0);
 }
 
 function showErrorMessage(message) {
+    running = false;
+
+    console.error(message);
+
+    var error = document.getElementById("lightningTipError");
+
+    error.parentElement.style.marginTop = "0.5em";
+    error.innerHTML = message;
+    error.classList.add("show");
+    setTimeout(function() {
+      error.classList.remove("show");
+    },2000);
+
+    var button = document.getElementById("lightningTipGetInvoice");
+
+    // Only necessary if it has a child (div with class spinner)
+    if (button.children.length !== 0) {
+        button.innerHTML = defaultGetInvoice;
+    }
+
+}
+
+function showMessage(text, type) {
   running = false;
-
-  console.error(message);
-
-  var error = document.getElementById("lightningTipError");
-
-  error.parentElement.style.marginTop = "0.5em";
-  error.innerHTML = message;
-  error.classList.add("show");
+  var wrapper = document.getElementById("lightningTip");
+  var message = document.createElement("section");
+  message.classList.add("message");
+  message.classList.add(type);
+  message.innerHTML = text;
+  wrapper.append(message);
   setTimeout(function() {
-    error.classList.remove("show");
-  },2000);
+    message.classList.add("show");
+  },100);
+  setTimeout(function() {
+    message.classList.remove("show");
+  },1500);
+  setTimeout(function() {
+    message.classList.remove(type);
+  },1700);
 
   var button = document.getElementById("lightningTipGetInvoice");
-
   // Only necessary if it has a child (div with class spinner)
   if (button.children.length !== 0) {
     button.innerHTML = defaultGetInvoice;
   }
-
 }
 
 function divRestorePlaceholder(element) {
-  // <br> and <div><br></div> mean that there is no user input
-  if (element.innerHTML === "<br>" || element.innerHTML === "<div><br></div>") {
-    element.innerHTML = "";
-  }
+    // <br> and <div><br></div> mean that there is no user input
+    if (element.innerHTML === "<br>" || element.innerHTML === "<div><br></div>") {
+        element.innerHTML = "";
+    }
 }
 
 function getVal(str) {
-  var v = window.location.search.match(new RegExp('(?:[\?\&]'+str+'=)([^&]+)'));
-  return v ? v[1] : null;
+    var v = window.location.search.match(new RegExp('(?:[\?\&]'+str+'=)([^&]+)'));
+    return v ? v[1] : null;
 }
+
+function reqListener() {
+  console.log(this.responseText);
+}
+
+function populateButtons() {
+  var amounts = document.querySelector('section.amounts');
+  for(var i = 0; i < tipAmounts.length; i++) {
+    var button = document.createElement("button");
+    button.innerHTML = tipAmountsLabel[i];
+    button.dataset.sat = tipAmounts[i];
+    amounts.appendChild(button);
+  }
+}
+
+function attachListeners() {
+  var amounts = document.querySelector('section.amounts');
+  var lightningTipAmount = document.getElementById('lightningTipAmount');
+  var buttons = amounts.children;
+  for (var i = 0; i < buttons.length; i++) {
+    if (buttons[i].tagName == "BUTTON") {
+      buttons[i].addEventListener("click", function(e) {
+        var current = this;
+        for (var i = 0; i < buttons.length; i++) {
+          if (current != buttons[i]) {
+            buttons[i].classList.remove('active');
+          } else {
+            current.classList.add('active');
+            lightningTipAmount.value = buttons[i].dataset.sat;
+            changeFiatLabel();
+          }
+        }
+        e.preventDefault();
+      });
+    }
+  };
+  var customAmount = document.getElementById('customAmount');
+  var customAmountLink = document.getElementById('customAmountLink');
+  customAmountLink.addEventListener("click", function(e) {
+    e.preventDefault();
+    customAmount.classList.toggle("active");
+  });
+  lightningTipAmount.oninput = changeFiatLabel;
+}
+
+function changeFiatLabel() {
+  var lightningTipAmount = document.getElementById('lightningTipAmount');
+  var inputAmount = lightningTipAmount.value;
+  var fiatPrice = calculateFiatPrice(inputAmount);
+  var label = document.querySelector('#customAmount label');
+  label.innerHTML = fiatPrice;
+}
+
+function calculateFiatPrice(sat) {
+  var amounts = document.querySelector('section.amounts');
+  switch (document.documentElement.lang) {
+    case 'de':
+      var price = amounts.dataset.btc_eur;
+      var locale = "de-DE";
+      var currency = "EUR";
+      break;
+    case 'en':
+      var price = amounts.dataset.btc_usd;
+      var locale = "en-US";
+      var currency = "USD";
+      break;
+    default:
+      var price = amounts.dataset.btc_usd;
+      break;
+  };
+  var fiatPrice = Math.round((price * (sat / 100000000) + 0.00001) * 100) / 100;
+  
+  return fiatPrice.toLocaleString(locale,
+                                 {style: 'currency', 
+                                  currency: currency });
+}
+
+function printFiatPrice() {
+  var amounts = document.querySelector('section.amounts');
+  var buttons = amounts.children;
+  for (var i = 0; i < buttons.length; i++) {
+    if (buttons[i].tagName == "BUTTON") {
+      var button = buttons[i];
+      var price = calculateFiatPrice(button.dataset.sat);
+      button.insertAdjacentHTML('beforeend', "<span>"+price+"</span>");
+    }
+  }
+}
+
+function getBitcoinPrice() {
+  var request = new XMLHttpRequest();
+  request.onreadystatechange = function () {
+    if (request.readyState === 4 && request.status === 200) {
+      var json = JSON.parse(request.responseText);
+      var amounts = document.querySelector('section.amounts');
+      amounts.dataset.btc_eur = json.eur;
+      amounts.dataset.btc_usd = json.usd;
+      printFiatPrice();
+    }
+
+  };
+  // var requestUrl = window.location.href + "inc/lightningTip.php";
+  request.open("POST", requestUrl, true);
+  request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+  var params = "Action=getfiatprice";
+  request.send(params);
+}
+
+function copyToClipboard(text) {
+  if (window.clipboardData && window.clipboardData.setData) {
+    // IE specific code path to prevent textarea being shown while dialog is visible.
+    return clipboardData.setData("Text", text); 
+
+  } else if (document.queryCommandSupported &&
+             document.queryCommandSupported("copy")) {
+    var textarea = document.createElement("textarea");
+    textarea.textContent = text;
+    textarea.style.position = "fixed";  // Prevent scrolling to bottom of page in MS Edge.
+    document.body.appendChild(textarea);
+    textarea.select();
+    try {
+      return document.execCommand("copy");  // Security exception may be thrown by some browsers.
+    } catch (ex) {
+      console.warn("Copy to clipboard failed.", ex);
+      return false;
+    } finally {
+      document.body.removeChild(textarea);
+    }
+  }
+}
+
+function main() {
+  populateButtons();
+  getBitcoinPrice();
+  attachListeners();
+}
+
+main();

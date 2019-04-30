@@ -32,8 +32,14 @@
     <div id="lightningTip">
       <p id="lightningTipLogo">⚡</p>
       <div id="lightningTipInputs">
-        <input type="number" class="lightningTipInput" id="lightningTipAmount" placeholder="Betrag in satoshi">
-        <textarea class="lightningTipInput" id="lightningTipMessage" placeholder="Schicke uns eine kurze Nachricht mit"></textarea>
+        <section class="amounts">
+          <section id="customAmount">
+            <input type="number" class="lightningTipInput" id="lightningTipAmount" placeholder="Betrag in satoshi">
+            <label for="lightningTipAmount"></label>
+          </section>
+        </section>
+        <a id="customAmountLink">anderer Betrag?</a>
+        <textarea class="lightningTipInput" id="lightningTipMessage" placeholder="Schicke uns eine kurze Nachricht mit (optional)"></textarea>
         <button class="lightningTipButton" id="lightningTipGetInvoice" onclick="getInvoice()">Generiere QR</button>
         <div id="lightningTipError">
           <p></p>
@@ -43,7 +49,7 @@
   </section>
   <script src="./inc/vue.min.js"></script>
   <script src="./inc/qrcode.min.js"></script>
-  <script src="./inc/lightningTip.min.js"></script>
+  <script src="./inc/lightningTip.js"></script>
   <script src="./inc/main.js"></script>
 </body>
 </html>
