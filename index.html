@@ -1,31 +1,30 @@
 <!DOCTYPE html>
-<html lang="de">
+<html lang="en">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Lightning Income</title>
+  <title>Lightning Fund-O-Mat</title>
   <link rel="stylesheet" type="text/css" href="style.css">
 </head>
 <body>
-  <section class="lightning">
-    <div class="pastFunding">
-      <div v-for="pastTarget in pastFundingTargets"
-           v-bind:pastTarget="pastTarget"
-           v-bind:key="pastTarget.id"
-           class="entry">
-        <div class="check">&#10004;</div>
-        <span>{{ pastTarget.fundingTitleComplete }}</span>
-      </div>
+  <section id="lightning">
+    <div class="label">
+      <span>{{ getFundingTitle() }}</span>
     </div>
-    <div v-for="fundingTarget in currentFundingTargets"
-         v-bind:fundingTarget="fundingTarget"
-         v-bind:key="fundingTarget.id"
+    <div v-bind:fundingTarget="currentFundingTarget"
+         v-bind:key="currentFundingTarget.id"
          class="currentFunding">
+      <transition-group name="show" tag="div" class="pastTargets">
+        <div v-for="pastTarget in pastFundingTargets"
+             v-bind:pastTarget="pastTarget"
+             v-bind:key="pastTarget.id"
+             v-bind:style="{ 'left': getOverallPercentage(pastTarget.fundingTarget) }"
+             class="pastTarget">
+            <span>{{ pastTarget.fundingTitleComplete }}</span>
+        </div>
+      </transition-group>
       <div class="progress" v-bind:style="{ 'width': getPercentage() }"></div>
-      <div class="label">
-        <span>{{ fundingTarget.fundingTitle }}</span>
-      </div>
     </div>
   </section>
   <section class="receiveLightning">
@@ -34,20 +33,21 @@
       <div id="lightningTipInputs">
         <section class="amounts">
           <section id="customAmount">
-            <input type="number" class="lightningTipInput" id="lightningTipAmount" placeholder="Betrag in satoshi">
+            <input type="number" class="lightningTipInput" id="lightningTipAmount" placeholder="amount in satoshi">
             <label for="lightningTipAmount"></label>
           </section>
         </section>
-        <a id="customAmountLink">anderer Betrag?</a>
-        <textarea class="lightningTipInput" id="lightningTipMessage" placeholder="Schicke uns eine kurze Nachricht mit (optional)"></textarea>
-        <button class="lightningTipButton" id="lightningTipGetInvoice" onclick="getInvoice()">Generiere QR</button>
+        <a id="customAmountLink">different amount?</a>
+        <textarea class="lightningTipInput" id="lightningTipMessage" placeholder="send us a nice message (optional)"></textarea>
+        <button class="lightningTipButton" id="lightningTipGetInvoice" onclick="getInvoice()">Generate invoice</button>
         <div id="lightningTipError">
           <p></p>
         </div>
       </div>
     </div>
   </section>
-  <script src="./inc/vue.min.js"></script>
+  <script src="./inc/vue.development.min.js"></script>
+  <!-- <script src="./inc/vue.production.min.js"></script> -->
   <script src="./inc/qrcode.min.js"></script>
   <script src="./inc/lightningTip.js"></script>
   <script src="./inc/main.js"></script>

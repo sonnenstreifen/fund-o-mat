@@ -2,31 +2,82 @@
 *:before,
 *:after {
   -webkit-box-sizing: border-box;
+  -moz-box-sizing: border-box;
   box-sizing: border-box;
 }
 
-.lightning {
+:focus {
+    outline: none;
+}
+
+::-moz-focus-inner {
+    border: 0;
+}
+
+#lightning {
   display: block;
   width: 100%;
+  font-family: sans-serif;
+  margin-top: 15px;
 }
 
-.lightning div.pastFunding .entry {
-  margin: 15px 0;
-}
-
-.lightning div.pastFunding div.check {
-  display: inline-block;
-  width: 25px;
-  height: 25px;
-  padding: 4px 6px;
+#lightning div.label span {
+  background-color: #333;
   color: #fff;
-  border-radius: 50%;
-  background-image: -webkit-gradient(linear,left top, right top,from(#555),to(hsl(104, 100%, 41%)));
-  background-image: linear-gradient(to right,#888,hsl(104, 100%, 41%));
-  margin-right: 2px;
+  padding: 3px 5px;
 }
 
-.lightning div.currentFunding {
+#lightning div.pastTargets {
+  position: relative;
+}
+
+#lightning div.pastTargets .pastTarget {
+  position: absolute;
+  top: 19px;
+  left: 15%;
+  width: 20px;
+  background: -moz-linear-gradient(left, rgba(0,0,0,0) 39%,rgb(255, 255, 255) 40%,rgb(255, 255, 255) 50%,rgb(255, 255, 255) 60%,rgba(0,0,0,0) 61%,rgba(0,0,0,0) 100%);
+  background: -webkit-linear-gradient(left, rgba(0,0,0,0) 39%,rgb(255, 255, 255) 40%,rgb(255, 255, 255) 50%,rgb(255, 255, 255) 60%,rgba(0,0,0,0) 61%,rgba(0,0,0,0) 100%);
+  background: linear-gradient(to right, rgba(0,0,0,0) 44%,rgb(255, 255, 255) 45%,rgb(255, 255, 255) 50%,rgb(255, 255, 255) 55%,rgba(0,0,0,0) 56%,rgba(0,0,0,0) 100%);
+  z-index: 111;
+  height: 11px;
+  margin-left: -10px;
+  transition: all .2s ease-out;
+}
+
+#lightning div.pastTargets .pastTarget span {
+  display: none;
+  position: absolute;
+  top: 30px;
+  left: 0;
+  width: auto;
+  white-space: nowrap;
+  padding: 3px 5px;
+  margin:1em calc(50% - 50vw);
+  margin-left: -3px;
+  background-color: #333;
+  color: #fff;
+}
+
+#lightning div.pastTargets .pastTarget span:before {
+  content: "";
+  position: absolute;
+  top: -8px;
+  border-left: 8px solid transparent;
+  border-right: 8px solid transparent;
+  border-bottom: 8px solid #333;
+}
+
+#lightning div.pastTargets .pastTarget:hover {
+  top: 0;
+  height: 30px;
+}
+
+#lightning div.pastTargets .pastTarget:hover span {
+  display: block;
+}
+
+#lightning div.currentFunding {
   position: relative;
   width: 100%;
   height: 30px;
@@ -36,19 +87,7 @@
   margin-bottom: 10px;
 }
 
-.lightning div.currentFunding div.label {
-  position: absolute;
-  margin-top: 6px;
-  z-index: 2;
-}
-
-.lightning div.currentFunding div.label span {
-  color: #fff;
-  padding: 3px 5px;
-  white-space: nowrap;
-}
-
-.lightning div.currentFunding div.progress {
+#lightning div.currentFunding div.progress {
   position: absolute;
   height: 30px;
   width: 33%;
@@ -60,14 +99,14 @@
   z-index: 1;
 }
 
-.lightning div.currentFunding div.progress::before {
+#lightning div.currentFunding div.progress::before {
   position: absolute;
   content: "";
   top: 0;
   right: 0;
   bottom: 0;
   left: 0;
-  background-image: -webkit-gradient(linear,left top, right top,from(#555),to(hsl(104, 100%, 41%)));
+  background-image: -webkit-gradient(linear,left top, right top,from(#888),to(hsl(104, 100%, 41%)));
   background-image: linear-gradient(to right,#888,hsl(104, 100%, 41%));
   z-index: -1;
   -webkit-transition: opacity 0.5s linear;
@@ -75,7 +114,7 @@
   opacity: 0;
 }
 
-.lightning div.currentFunding div.progress.active::before {
+#lightning div.currentFunding div.progress.active::before {
   opacity: 1;
 }
 
@@ -100,7 +139,7 @@ section.receiveLightning {
 
 #lightningTipLogo {
   margin-top: 10px;
-  margin-bottom: 23px;
+  margin-bottom: 20px;
   font-size: 35px;
   color: #ffac33;
 }
@@ -131,6 +170,8 @@ section.receiveLightning {
   background-color: #f7be6a;
   cursor: pointer;
   color: #333;
+  outline: none;
+  border: 0;
 }
 
 #lightningTipInputs section.amounts button:focus span,
@@ -235,7 +276,7 @@ section.receiveLightning {
 }
 
 #lightningTipMessage {
-  min-height: 52px;
+  height: 55px;
   margin-top: 10px;
   padding: 9px 10px;
   color: #333;
@@ -248,7 +289,7 @@ section.receiveLightning {
 
 #lightningTip section.message {
   position: absolute;
-  bottom: -40px;
+  bottom: -60px;
   width: 100%;
   padding: 9px 10px;
   color: #fff;
