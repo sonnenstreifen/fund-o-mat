@@ -87,13 +87,13 @@ if ($_GET['testnet']) {
   define('TESTNET', false);
 }
 
-function getPaymentRequest($memo='',$satoshi=0,$expiry=EXPIRY) {
+function getPaymentRequest($memo = '', $satoshi = 0, $expiry = EXPIRY) {
   $lnd_ip               = LND_IP;
   $lnd_port             = LND_PORT;
   $invoice_macaroon_hex = INVOICE_MACAROON_HEX;
 
   $data = json_encode(array(
-    "memo"   => (TESTNET=='true'?'[TESTNET] ':'').$memo,
+    "memo"   => (TESTNET == 'true' ? '[TESTNET] ':'').$memo,
     "value"  => "$satoshi",
     "expiry" => $expiry)
   );
@@ -148,7 +148,7 @@ switch ($_POST['Action']) {
       if (!isset($Invoice->memo)) {
         $Invoice->memo = "";
       }
-      Database::insertTip($Invoice->value, $Invoice->memo);
+      $Invoice->savedInDB = Database::insertTip($Invoice->value, $Invoice->memo);
     }
     echo json_encode($Invoice);
     exit;
