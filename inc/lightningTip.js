@@ -1,6 +1,7 @@
 ///////// CHANGE ME ////////
-//var requestUrl = window.location.protocol + "//" + window.location.hostname + "/lightning/lightningTip.php";
-var requestUrl = "https://sonnenstreifen.de/lightning/inc/lightningTip.php";
+var requestUrl      = window.location.protocol + "//" +
+                      window.location.hostname +
+                      window.location.pathname + "inc/lightningTip.php";
 var tipAmounts      = [10000,20000,40000];
 var tipAmountsLabel = ['10k sat','20k sat','40k sat'];
 ///////// END CHANGE ME ////////
@@ -11,6 +12,7 @@ var running = false;
 var invoice;
 var qrCode;
 var defaultGetInvoice;
+var lang = [];
 
 // Data capacities for QR codes with mode byte and error correction level L (7%)
 // Shortest invoice: 194 characters
@@ -32,185 +34,81 @@ var qrCodeDataCapacities = [
     {"typeNumber": 22, "capacity": 1003},
     {"typeNumber": 23, "capacity": 1091},
     {"typeNumber": 24, "capacity": 1171},
-    {"typeNumber": 25, "capacity": 1273}
-];
+    {"typeNumber": 25, "capacity": 1273}];
 
 switch (document.documentElement.lang) {
   case 'de':
     lang = {
       NO_TIP_AMOUNT: "Kein Spendenbetrag gesetzt",
       MUST_BE_NUMBER: "Spendenbetrag muss eine Zahl sein",
+      AMOUNT_TO_HIGH: "Betrag zu hoch, bitte sende eine normale Bitcoin Transaktion",
       BACKEND_FAIL: "Lightning Node nicht erreichbar",
       THANK_YOU: "Vielen Dank für deine Spende!",
-      INVOICE_EXPIRED: "Der QR Code ist abgelaufen, bitte generiere einen neuen indem du die Seite erneut aufrufst!",
       GENERATE_QR: "Generiere QR"
     };
     break;
   case 'en':
+  default:
     lang = {
       NO_TIP_AMOUNT: "No tip amount set",
       MUST_BE_NUMBER: "Tip amount must be a number",
+      AMOUNT_TO_HIGH: "Amount too high, please send a standard Bitcoin transaction",
       BACKEND_FAIL: "Failed to reach Lightning Node",
       THANK_YOU: "Thank you for your Tip!",
-      INVOICE_EXPIRED: "Your tip request expired!",
-      GENERATE_QR: "Generate QR"
+      GENERATE_QR: "Generate invoice"
     };
-    break;
-  default:
     break;
 }
 
-// TODO: show invoice even if JavaScript is disabled
-// TODO: fix scaling on phones
-// TODO: show price in dollar?
-function getInvoice() {
-  if (running === false) {
-    running = true;
+function showMessage(text, type) {
+  running = false;
+  var wrapper = document.getElementById("lightningTip"),
+      message = document.createElement("section"),
+      button = document.getElementById("lightningTipGetInvoice");
+  message.classList.add("message");
+  message.classList.add(type);
+  message.innerHTML = text;
+  wrapper.append(message);
+  setTimeout(function () {
+    message.classList.add("show");
+  }, 100);
+  setTimeout(function () {
+    message.classList.remove("show");
+  }, 1500);
+  setTimeout(function () {
+    message.classList.remove(type);
+  }, 1700);
 
-    var tipValue = document.getElementById("lightningTipAmount");
-
-    if (tipValue.value !== "") {
-      if (!isNaN(tipValue.value)) {
-        var request = new XMLHttpRequest();
-
-        request.onreadystatechange = function () {
-          if (request.readyState === 4) {
-            try {
-              var json = JSON.parse(request.responseText);
-
-              if (request.status === 200) {
-                console.log("Got invoice: " + json.Invoice);
-                console.log("Invoice expires in: " + json.Expiry);
-                console.log("Start listening for invoice to get settled");
-                listenInvoiceSettled(json.r_hash_str);
-                invoice = json.Invoice;
-                showQRCode();
-                running = false;
-              } else {
-                showMessage(json.Error, "error");
-              }
-            } catch (exception) {
-              console.error(exception);
-              showMessage(lang.BACKEND_FAIL, "error");
-            }
-          }
-        };
-        request.open("POST", requestUrl , true);
-        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-        var params = "Action=getinvoice&Amount=" + parseInt(tipValue.value) + "&Message=" + encodeURIComponent(document.getElementById("lightningTipMessage").value);
-        console.log(params);
-        request.send(params);
-        var button = document.getElementById("lightningTipGetInvoice");
-        defaultGetInvoice = button.innerHTML;
-        button.innerHTML = "<div class='spinner'></div>";
-      } else {
-        showMessage(lang.MUST_BE_NUMBER, "error");
-      }
-    } else {
-      showMessage(lang.NO_TIP_AMOUNT, "error");
-    }
-  } else {
-    console.warn("Last request still pending");
+  // Only necessary if it has a child (div with class spinner)
+  if (button.children.length !== 0) {
+    button.innerHTML = defaultGetInvoice;
   }
 }
 
-function listenInvoiceSettled(r_hash_str) {
-  var interval = setInterval(function () {
-    var request = new XMLHttpRequest();
+function createQRCode() {
+  var invoiceLength = invoice.length;
 
-    //Prevent multiple calls for same invoice settled over slow networks.
-	var IsSettled = false;
-    if ( IsSettled == true) {
-      return;
+  // Just in case an invoice bigger than expected gets created
+  var typeNumber = 26;
+
+  for (var i = 0; i < qrCodeDataCapacities.length; i++) {
+    var dataCapacity = qrCodeDataCapacities[i];
+
+    if (invoiceLength < dataCapacity.capacity) {
+      typeNumber = dataCapacity.typeNumber;
+
+      break;
     }
+  }
 
-    request.onreadystatechange = function () {
-      if (request.readyState === 4 && request.status === 200) {
-        var json = JSON.parse(request.responseText);
+  console.log("Creating QR code with type number: " + typeNumber);
 
-        if (json.settled) {
-          console.log("Invoice settled");
-          IsSettled = true;
-          clearInterval(interval);
-          showThankYouScreen();
-        }
+  var qr = qrcode(typeNumber, "L");
 
-      }
-    };
+  qr.addData(invoice);
+  qr.make();
 
-    request.open("POST", requestUrl, true);
-    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
-    var params = "Action=invoicesettled&r_hash_str=" + r_hash_str;
-    request.send(params);
-  }, 2000);
-}
-
-function showThankYouScreen() {
-  var qrOverlay = document.getElementById("qrOverlay");
-  qrOverlay.remove();
-
-  var wrapper = document.getElementById("lightningTip");
-
-  var thanksOverlay = document.createElement("section");
-  thanksOverlay.setAttribute("id", "thanksOverlay");
-
-  var thanksText = document.createElement("p");
-  thanksText.innerHTML = lang.THANK_YOU;
-  thanksOverlay.append(thanksText);
-  thanksOverlay.classList.add("show");
-
-  wrapper.append(thanksOverlay);
-
-  setTimeout(function() {
-    thanksOverlay.classList.remove("show");
-  },5000);
-}
-
-function starTimer(duration, element) {
-    showTimer(duration, element);
-
-    var interval = setInterval(function () {
-        if (duration > 1) {
-            duration--;
-
-            showTimer(duration, element);
-
-        } else {
-            showExpired();
-
-            clearInterval(interval);
-        }
-
-    }, 1000);
-
-}
-
-function showTimer(duration, element) {
-    var seconds = Math.floor(duration % 60);
-    var minutes = Math.floor((duration / 60) % 60);
-    var hours = Math.floor((duration / (60 * 60)) % 24);
-
-    seconds = addLeadingZeros(seconds);
-    minutes = addLeadingZeros(minutes);
-
-    if (hours > 0) {
-        element.innerHTML = hours + ":" + minutes + ":" + seconds;
-
-    } else {
-        element.innerHTML = minutes + ":" + seconds;
-    }
-
-}
-
-function showExpired() {
-    var wrapper = document.getElementById("lightningTip");
-
-    wrapper.innerHTML = "<p id=\"lightningTipLogo\">⚡</p>";
-    wrapper.innerHTML += "<p id='lightningTipFinished'>" + lang.INVOICE_EXPIRED + "</p>";
-}
-
-function addLeadingZeros(value) {
-    return ("0" + value).slice(-2);
+  return qr.createImgTag(6, 0);
 }
 
 function showQRCode() {
@@ -258,95 +156,111 @@ function showQRCode() {
   });
 }
 
-function createQRCode() {
-    var invoiceLength = invoice.length;
+function showThankYouScreen() {
+  var qrOverlay = document.getElementById("qrOverlay");
+  qrOverlay.remove();
 
-    // Just in case an invoice bigger than expected gets created
-    var typeNumber = 26;
+  var wrapper = document.getElementById("lightningTip");
 
-    for (var i = 0; i < qrCodeDataCapacities.length; i++) {
-        var dataCapacity = qrCodeDataCapacities[i];
+  var thanksOverlay = document.createElement("section");
+  thanksOverlay.setAttribute("id", "thanksOverlay");
 
-        if (invoiceLength < dataCapacity.capacity) {
-            typeNumber = dataCapacity.typeNumber;
+  var thanksText = document.createElement("p");
+  thanksText.innerHTML = lang.THANK_YOU;
+  thanksOverlay.append(thanksText);
+  thanksOverlay.classList.add("show");
 
-            break;
+  wrapper.append(thanksOverlay);
+
+  setTimeout(function () {
+    thanksOverlay.classList.remove("show");
+  }, 5000);
+}
+
+function listenInvoiceSettled(r_hash_str) {
+  var interval = setInterval(function () {
+    var request = new XMLHttpRequest();
+
+    //Prevent multiple calls for same invoice settled over slow networks.
+    var IsSettled = false;
+    if (IsSettled === true) {
+      return;
+    }
+
+    request.onreadystatechange = function () {
+      if (request.readyState === 4 && request.status === 200) {
+        var json = JSON.parse(request.responseText);
+
+        if (json.settled) {
+          console.log("Invoice settled");
+          IsSettled = true;
+          clearInterval(interval);
+          showThankYouScreen();
         }
 
-    }
+      }
+    };
 
-    console.log("Creating QR code with type number: " + typeNumber);
-
-    var qr = qrcode(typeNumber, "L");
-
-    qr.addData(invoice);
-    qr.make();
-
-    return qr.createImgTag(6, 0);
+    request.open("POST", requestUrl, true);
+    request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+    var params = "Action=invoicesettled&r_hash_str=" + r_hash_str;
+    request.send(params);
+  }, 2000);
 }
 
-function showErrorMessage(message) {
-    running = false;
+function getInvoice() {
+  if (running === false) {
+    running = true;
 
-    console.error(message);
+    var tipValue = document.getElementById("lightningTipAmount");
 
-    var error = document.getElementById("lightningTipError");
+    if (tipValue.value !== "") {
+      if (!isNaN(tipValue.value)) {
+        var request = new XMLHttpRequest();
 
-    error.parentElement.style.marginTop = "0.5em";
-    error.innerHTML = message;
-    error.classList.add("show");
-    setTimeout(function() {
-      error.classList.remove("show");
-    },2000);
+        request.onreadystatechange = function () {
+          if (request.readyState === 4) {
+            try {
+              var json = JSON.parse(request.responseText);
 
-    var button = document.getElementById("lightningTipGetInvoice");
-
-    // Only necessary if it has a child (div with class spinner)
-    if (button.children.length !== 0) {
-        button.innerHTML = defaultGetInvoice;
+              if (request.status === 200) {
+                console.log("Got invoice: " + json.Invoice);
+                console.log("Invoice expires in: " + json.Expiry);
+                console.log("Start listening for invoice to get settled");
+                listenInvoiceSettled(json.r_hash_str);
+                invoice = json.Invoice;
+                showQRCode();
+                running = false;
+              } else {
+                showMessage(json.Error, "error");
+              }
+            } catch (exception) {
+              if (tipValue.value > 4294967) {
+                showMessage(lang.AMOUNT_TO_HIGH, "error");
+              } else {
+                console.error(exception);
+                showMessage(lang.BACKEND_FAIL, "error");
+              }
+            }
+          }
+        };
+        request.open("POST", requestUrl , true);
+        request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
+        var params = "Action=getinvoice&Amount=" + parseInt(tipValue.value) + "&Message=" + encodeURIComponent(document.getElementById("lightningTipMessage").value);
+        console.log(params);
+        request.send(params);
+        var button = document.getElementById("lightningTipGetInvoice");
+        defaultGetInvoice = button.innerHTML;
+        button.innerHTML = "<div class='spinner'></div>";
+      } else {
+        showMessage(lang.MUST_BE_NUMBER, "error");
+      }
+    } else {
+      showMessage(lang.NO_TIP_AMOUNT, "error");
     }
-
-}
-
-function showMessage(text, type) {
-  running = false;
-  var wrapper = document.getElementById("lightningTip");
-  var message = document.createElement("section");
-  message.classList.add("message");
-  message.classList.add(type);
-  message.innerHTML = text;
-  wrapper.append(message);
-  setTimeout(function() {
-    message.classList.add("show");
-  },100);
-  setTimeout(function() {
-    message.classList.remove("show");
-  },1500);
-  setTimeout(function() {
-    message.classList.remove(type);
-  },1700);
-
-  var button = document.getElementById("lightningTipGetInvoice");
-  // Only necessary if it has a child (div with class spinner)
-  if (button.children.length !== 0) {
-    button.innerHTML = defaultGetInvoice;
+  } else {
+    console.warn("Last request still pending");
   }
-}
-
-function divRestorePlaceholder(element) {
-    // <br> and <div><br></div> mean that there is no user input
-    if (element.innerHTML === "<br>" || element.innerHTML === "<div><br></div>") {
-        element.innerHTML = "";
-    }
-}
-
-function getVal(str) {
-    var v = window.location.search.match(new RegExp('(?:[\?\&]'+str+'=)([^&]+)'));
-    return v ? v[1] : null;
-}
-
-function reqListener() {
-  console.log(this.responseText);
 }
 
 function populateButtons() {
@@ -415,9 +329,9 @@ function calculateFiatPrice(sat) {
       break;
   };
   var fiatPrice = Math.round((price * (sat / 100000000) + 0.00001) * 100) / 100;
-  
-  return fiatPrice.toLocaleString(locale,
-                                 {style: 'currency', 
+
+  return fiatPrice.toLocaleString(locale, {
+                                  style: 'currency',
                                   currency: currency });
 }
 
@@ -445,7 +359,6 @@ function getBitcoinPrice() {
     }
 
   };
-  // var requestUrl = window.location.href + "inc/lightningTip.php";
   request.open("POST", requestUrl, true);
   request.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
   var params = "Action=getfiatprice";
@@ -455,7 +368,7 @@ function getBitcoinPrice() {
 function copyToClipboard(text) {
   if (window.clipboardData && window.clipboardData.setData) {
     // IE specific code path to prevent textarea being shown while dialog is visible.
-    return clipboardData.setData("Text", text); 
+    return clipboardData.setData("Text", text);
 
   } else if (document.queryCommandSupported &&
              document.queryCommandSupported("copy")) {
