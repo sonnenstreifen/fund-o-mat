@@ -34,10 +34,10 @@ class Database {
   public static function insertTip($amount, $message, $txid = "") {
     $database = Database::getInstance()->getConnection();
     $sql = "INSERT INTO donations
-    SET amount      = :amount,
-        message     = :message,
-        txid        = :txid,
-        donated     = NOW()";
+            SET amount      = :amount,
+                message     = :message,
+                txid        = :txid,
+                donated     = NOW()";
     $query = $database->prepare($sql);
     $query->bindParam(':amount',      $amount,                PDO::PARAM_INT);
     $query->bindParam(':message',     $message,               PDO::PARAM_STR);
@@ -73,8 +73,10 @@ class Database {
               `id` int(11) NOT NULL AUTO_INCREMENT,
               `amount` int(50) NOT NULL,
               `message` varchar(200) COLLATE utf8_unicode_ci NOT NULL,
+              `txid` varchar(256) COLLATE utf8_unicode_ci NULL DEFAULT NULL,
               `donated` datetime NOT NULL,
-              PRIMARY KEY (`id`)
+              PRIMARY KEY (`id`),
+              INDEX `txid` (`txid`)
             ) ENGINE=MyISAM  DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci;";
     $database->query($sql);
   }
