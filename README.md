@@ -1,6 +1,6 @@
 # Fund-O-Mat
 
-![Fund-O-Mat in Action!](https://user-images.githubusercontent.com/3533927/59958077-3e74d380-94a1-11e9-8a06-6a6e64f15686.gif)
+![Fund-O-Mat in Action!](https://user-images.githubusercontent.com/3533927/59965922-f7c0c100-9514-11e9-832e-57cba9cbd390.gif)
 
 Fund-O-Mat provides a simple and minimalistic way to accept tips via the Bitcoin
 Lightning Network on your website and visualize the progress on funding goals.
