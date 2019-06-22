@@ -172,6 +172,23 @@ function showThankYouScreen() {
 
   wrapper.append(thanksOverlay);
 
+  //reset active states and clear inputs
+  var customAmount = document.getElementById("customAmount");
+  customAmount.classList.remove("active");
+  var amountButtons = document.getElementById("lightningTipInputs")
+                              .querySelector("section.amounts").children;
+  for (var i = 0; i < amountButtons.length; i++) {
+    console.log(amountButtons[i].classList);
+    amountButtons[i].classList.remove("active");
+  }
+  var amountInput = document.getElementById("lightningTipAmount");
+  var messageInput = document.getElementById("lightningTipMessage");
+  var label = document.querySelector('#customAmount label');
+  amountInput.value = '';
+  messageInput.value = '';
+  label.innerHTML = '';
+  document.activeElement.blur();
+
   setTimeout(function () {
     thanksOverlay.classList.remove("show");
   }, 5000);
