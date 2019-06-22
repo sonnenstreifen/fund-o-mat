@@ -1,13 +1,6 @@
 # Fund-O-Mat
 
-```
- _____                _        ___        __  __       _   
-|  ___|   _ _ __   __| |      / _ \      |  \/  | __ _| |_
-| |_ | | | | '_ \ / _` |_____| | | |_____| |\/| |/ _` | __|
-|  _|| |_| | | | | (_| |_____| |_| |_____| |  | | (_| | |_
-|_|   \__,_|_| |_|\__,_|      \___/      |_|  |_|\__,_|\__|
-                                                Version 1.0
-```
+![Fund-O-Mat in Action!](https://user-images.githubusercontent.com/3533927/59957906-9231ed80-949e-11e9-824b-bff28568111e.gif)
 
 Fund-O-Mat provides a simple and minimalistic way to accept tips via the Bitcoin
 Lightning Network on your website and visualize the progress on funding goals.
@@ -35,8 +28,9 @@ installation
 
 ## Demo
 
-I will build up a nice little demo of the capabilities in the coming days. In
-the meantime you can see it in action here:
+[Fund-O-Mat Demo](https://fund-o-mat.sonnenstreifen.de)
+
+Projects that use Fund-O-Mat:
 
 [mikroBIOMIK.org](https://mikrobiomik.org/en/support-us)
 
